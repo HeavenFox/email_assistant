@@ -5,7 +5,8 @@ from collections import namedtuple
 Request = namedtuple('Request', ['command', 'email', 'reference'])
 
 class RequestParser(object):
-    def parse(self, email):
+    @classmethod
+    def parse(cls, email):
         body = email.body.decode()
 
         splitted = re.split('-{4,}[^-]+-{4,}', body, maxsplit=1)
