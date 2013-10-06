@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
+from google.appengine.api import urlfetch
+
 try:
 	from urllib.request import urlopen
 	from urllib.parse import urlparse
@@ -533,18 +535,19 @@ class AlchemyAPI:
 		url = AlchemyAPI.BASE_URL + url;
 
 		#Add the API Key and set the output mode to JSON
-		url += '?apikey=' + self.apiKey + '&outputMode=json'
+		payload = 'apikey=' + self.apiKey + '&outputMode=json'
 
 		#Add the options	
 		for key in options:
-			url += '&' + key + '=' + str(options[key])
+			payload += '&' + key + '=' + str(options[key])
 		
 		try: 
 			#build the request with uri encoding
-			page = urlopen(url).read().decode("utf-8")
+			page = urlfetch.fetch(url, payload=payload, method=urlfetch.POST,headers={'Content-Type': 'application/x-www-form-urlencoded'}).content
 			return json.loads(page)
 		except Exception as e:
 			print('error for url: ', url)
 			print(e)
+                        raise
 			return { 'status':'ERROR', 'statusInfo':'network-error' }
 

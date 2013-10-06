@@ -41,8 +41,8 @@ class NewEventAction(Action):
         reply.body = 'We have created the event for you. \n'
         reply.body += '\n'
         reply.body += (' * Name: ' + event_name + '\n')
-        reply.body += (' * Start: ' + str(start_time) + '\n')
-        reply.body += (' * End: ' + str(end_time) + '\n')
+        reply.body += (' * Start: ' + time_format(start_time) + '\n')
+        reply.body += (' * End: ' + time_format(end_time) + '\n')
         reply.body += (' * Location: ' + (loc) + '\n')
 
         return reply
