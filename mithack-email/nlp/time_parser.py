@@ -1,5 +1,6 @@
 import re
 # from util import combine_intervals
+from util import *
 
 DAY_OF_WEEK = 0
 DATE = 1

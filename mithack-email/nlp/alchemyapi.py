@@ -97,8 +97,6 @@ class AlchemyAPI:
 				#setup the key
 				self.apiKey = key
 				
-			# Close file
-			f.close()
 		except IOError:
 			#The file doesn't exist, so show the message and create the file.
 			print('API Key not found! Please run: python alchemyapi.py YOUR_KEY_HERE')

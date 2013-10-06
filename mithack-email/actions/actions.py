@@ -1,4 +1,5 @@
 from google.appengine.api.mail import EmailMessage
+import nlp
 
 class Action(object):
     def __init__(self, context):
@@ -22,6 +23,14 @@ class InvalidAction(Action):
 
 class NewEventAction(Action):
     def act(self):
+        email = self.context.email
+        text = email.body.decode()
+        subject = email.subject
+
+        start_time, end_time = nlp.time_parser.parse(text)
+        event_name = ' - '.join(nlp.topic_parser.generate_topics(subject, text))
+        loc = nlp.location_parser.parse(text)
+
         reply = self.build_reply(self.context.email)
         reply.body = 'We have created the event for ya.'
         return reply
