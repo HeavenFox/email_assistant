@@ -8,5 +8,19 @@ inbound_services:
 - mail
 
 handlers:
-- url: /_ah/mail/.*
-  script: mew_email_handle.app
+- url: /test/.*
+  script: helloworld.application
+- url: /static
+  static_dir: static
+- url: /util/cleanhtml
+  script: cleanhtml.application
+- url: /_ah/mail/echohtml@hpmvforward.appspotmail.com
+  script: mew_email_handle.echohtml
+  login: admin
+- url: /_ah/mail/echotext@hpmvforward.appspotmail.com
+  script: mew_email_handle.echotext
+  login: admin
+
+libraries:
+- name: lxml
+  version: "2.3"
