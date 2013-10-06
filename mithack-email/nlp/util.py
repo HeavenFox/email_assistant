@@ -1,23 +1,7 @@
 import re
 import parsedatetime as pdt
 import time_parser
-
-def combine_intervals(intvs):
-    intervals = sorted(intvs)
-    combined_intervals = []
-    last_s, last_t, last_type = intervals[0]
-    for s, t, lt in intervals[1:]:
-        if s <= last_t:
-            last_t = t
-            last_type = max(lt, last_type)
-        else:
-            combined_intervals.append((last_s, last_t, last_type))
-            last_s = s
-            last_t = t
-            last_type = lt
-
-    combined_intervals.append((last_s, last_t, last_type))
-    return combined_intervals
+import time
 
 
 # Given a string of the email content, an exact match of text
@@ -54,9 +38,11 @@ def match_date_paragraph(email, date):
             d += 1
         return "\n".join(paragraphs[u:d])
 
-def parse_single_time(email, interval):
-    pass
+# take a list of intervals
+def parse_single_time(email, interval, basetime = None):
+    # import pdb; pdb.set_trace()
     parser = pdt.Calendar()
+    interval = filter(lambda x: x[2] != time_parser.TIME_INTERVAL and x != time_parser.DATE_INTERVAL, interval)
     types = [x[2] for x in interval]
     if time_parser.DAY_OF_WEEK in types and time_parser.DATE in types:
         interval = filter(lambda x: x[2] != time_parser.DAY_OF_WEEK, interval)
@@ -64,17 +50,71 @@ def parse_single_time(email, interval):
     target = ""
     if time_parser.DAY_OF_WEEK in types:
         tlst = filter(lambda x: x[2] == time_parser.DAY_OF_WEEK, interval)
-        target += (email[tlst[0][0]:tlst[0][1]] + " ")
+        target += (email[tlst[0][0]:tlst[0][1]] + ", ")
     if time_parser.DATE in types:
         tlst = filter(lambda x: x[2] == time_parser.DATE, interval)
-        target += (email[tlst[0][0]:tlst[0][1]] + " ")
+        target += (email[tlst[0][0]:tlst[0][1]] + ", ")
     if time_parser.TIME in types:
         tlst = filter(lambda x: x[2] == time_parser.TIME, interval)
-        target += (email[tlst[0][0]:tlst[0][1]] + " ")
-    result, succ = parser.parse(target)
+        target += (email[tlst[0][0]:tlst[0][1]] + ", ")
+    result, succ = parser.parse(target.strip(), basetime)
     if succ == 0:
         return None
+    if type(result) == type(tuple()):
+        result = time.struct_time(result, basetime)
     return result
+
+def parse(text):
+    # try:
+    import pdb; pdb.set_trace()
+    intv = time_parser.tag_dates(text)
+    types = [x[2] for x in intv]
+    if time_parser.TIME_INTERVAL in types:
+        return parse_interval(text, intv)
+    t = parse_single_time(text, intv)
+    tnext = parse_single_time(text, intv)
+    tnext.tm_hour += 1
+    if tnext.tm_hour == 24:
+        tnext.tm_hour = 0
+        tnext.tm_mday += 1
+    return t, tnext
+# except:
+    #     return None
+
+def parse_interval(email, interval):
+
+    minl = 1 << 20
+    maxr = -1
+    for l,r,_ in interval:
+        minl = min(l, minl)
+        maxr = max(r, maxr)
+    timestr = email[minl:maxr]
+
+    if timestr.find("and") != -1 or timestr.find("to") != -1:
+        if timestr.find("and") != -1:
+            strarr = timestr.split("and")
+        else:
+            strarr = timestr.split("to")
+        intv0 = time_parser.tag_dates(timestr[0]) 
+        intv1 = time_parser.tag_dates(timestr[1]) 
+        return parse_single_time(timestr[0], intv[0]), parse_single_time(timestr[1], intv[1])
+
+    elif timestr.find("-") != -1:
+        intv = time_parser.tag_dates(timestr)
+        basetime = parse_single_time(text, intv)
+        intv = filter(lambda x: x[2] == time_parser.TIME_INTERVAL or x == time_parser.DATE_INTERVAL, intv)
+        intv = intv[0]
+        timestr = email[intv[0][0] : intv[0][1]]
+        tarray = timestr.split("-")
+        tintv = time_parser.tag_dates(tarray[1])
+        endtime = parse_single_time(tarray[1], tintv, basetime) 
+        ampm = "am"
+        if endtime.tm_hour > 12:
+            ampm = "pm"
+        tintv = time_parser.tag_dates(tarray[0] + ampm)
+        starttime = parse_single_time(tarray[0]+ampm, tintv, basetime)
+
+        return startime, endtime
 
 
 
@@ -83,44 +123,25 @@ def parse_single_time(email, interval):
 def combine_times(intervals):
     res = []
     i = 0
+    print intervals
+    # import pdb; pdb.set_trace()
     while i < len(intervals):
         j = i
         t = [intervals[i]]
         while j < len(intervals) - 1:
-            _, ed, _ = intervals[j]
-            st, _, _ = intervals[j+1]
+            ed = intervals[j][1]
+            st = intervals[j+1][0]
             if st - ed < DATE_CONCAT_LIMIT:
                 t.append(intervals[j+1])
+                j += 1
             else:
                 break
         res.append(t)
+        i = j + 1
     return res
 
 # Given a String of time 
 # Single Point of Tim [s1, t1, date]
 # Date, time - time
 # Date, time - Date. time
-def parse_interval(email, interval):
-
-    intv = []
-    if timestr.find("and") != -1:
-        intv = timestr.split("and")
-    elif timestr.find("to") != -1:
-        intv = timestr.split("to")
-    elif timestr.find("-") != -1:
-        intv = timestr.split("-")
-
-    if len(intv) < 2:
-        return None
-
-    tbegin = parse_time(intv[0])
-    
-
-
-    
-
-
-
-
-
 
