@@ -1,3 +1,3 @@
 class Context(object):
     def __init__(self, email):
-        self.email = None
+        self.email = email

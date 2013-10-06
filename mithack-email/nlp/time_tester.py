@@ -19,7 +19,7 @@ except:
 
 for i in xrange(len(s)):
     if i == last:
-        print('---', end='')
+        print('####',end='')
         try:
             last = gen.next()
         except:
