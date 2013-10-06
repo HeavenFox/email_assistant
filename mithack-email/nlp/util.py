@@ -2,23 +2,22 @@ import re
 import parsedatetime as pdt
 import time_parser
 
-# def combine_intervals(intvs, st, insig_func):
-# 	intervals = sorted(intvs)
-# 	combined_intervals = []
-# 	last_s, last_t = intervals[0]
-# 	for s, t in intervals[1:]:
-# 		if s > last_t:
-# 			if insig_func(st[last_t:s]):
-# 				last_t = t
-# 			else:
-# 				combined_intervals.append((last_s, last_t))
-# 				last_s = s
-# 				last_t = t
-# 		else:
-# 			last_t = t
+def combine_intervals(intvs):
+    intervals = sorted(intvs)
+    combined_intervals = []
+    last_s, last_t, last_type = intervals[0]
+    for s, t, lt in intervals[1:]:
+        if s <= last_t:
+            last_t = t
+            last_type = max(lt, last_type)
+        else:
+            combined_intervals.append((last_s, last_t, last_type))
+            last_s = s
+            last_t = t
+            last_type = lt
 
-# 	combined_intervals.append((last_s, last_t))
-# 	return combined_intervals
+    combined_intervals.append((last_s, last_t, last_type))
+    return combined_intervals
 
 
 # Given a string of the email content, an exact match of text
@@ -53,14 +52,31 @@ def match_date_paragraph(email, date):
             u -= 1
         while d < len(paragraphs) and len(paragraphs[d]) > 0 and len(paragraphs[d] <= SHORT_SENTENCE_LIMIT):
             d += 1
-        return paragraphs[u:d]
+        return "\n".join(paragraphs[u:d])
 
-def parse_time(timestr):
+def parse_single_time(email, interval):
+    pass
     parser = pdt.Calendar()
-    t, succ = parser.parse(timestr)
+    types = [x[2] for x in interval]
+    if time_parser.DAY_OF_WEEK in types and time_parser.DATE in types:
+        interval = filter(lambda x: x[2] != time_parser.DAY_OF_WEEK, interval)
+    types = [x[2] for x in interval]
+    target = ""
+    if time_parser.DAY_OF_WEEK in types:
+        tlst = filter(lambda x: x[2] == time_parser.DAY_OF_WEEK, interval)
+        target += (email[tlst[0][0]:tlst[0][1]] + " ")
+    if time_parser.DATE in types:
+        tlst = filter(lambda x: x[2] == time_parser.DATE, interval)
+        target += (email[tlst[0][0]:tlst[0][1]] + " ")
+    if time_parser.TIME in types:
+        tlst = filter(lambda x: x[2] == time_parser.TIME, interval)
+        target += (email[tlst[0][0]:tlst[0][1]] + " ")
+    result, succ = parser.parse(target)
     if succ == 0:
         return None
-    return t
+    return result
+
+
 
 # Given [(st, ed, type)] 
 # Concat adjacent date

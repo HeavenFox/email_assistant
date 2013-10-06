@@ -23,4 +23,4 @@ def tag_dates(s):
             for match in regex.finditer(s, re.I):
                 intervals.append((match.start(), match.end(), typ))
 
-    return intervals
+    return util.combine_intervals(intervals)
