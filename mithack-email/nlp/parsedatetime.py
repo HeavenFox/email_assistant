@@ -28,7 +28,7 @@ except ImportError:
     imap = map
 from itertools import chain
 
-from . import pdt_locales
+import pdt_locales
 
 # as a library, do *not* setup logging
 # see http://docs.python.org/2/howto/logging.html#configuring-logging-for-a-library
