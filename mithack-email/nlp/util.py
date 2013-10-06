@@ -61,22 +61,19 @@ def parse_single_time(email, interval, basetime = None):
     if succ == 0:
         return None
     if type(result) == type(tuple()):
-        result = time.struct_time(result, basetime)
+        result = time.struct_time(result)
     return result
 
 def parse(text):
     # try:
-    import pdb; pdb.set_trace()
     intv = time_parser.tag_dates(text)
     types = [x[2] for x in intv]
     if time_parser.TIME_INTERVAL in types:
         return parse_interval(text, intv)
     t = parse_single_time(text, intv)
-    tnext = parse_single_time(text, intv)
-    tnext.tm_hour += 1
-    if tnext.tm_hour == 24:
-        tnext.tm_hour = 0
-        tnext.tm_mday += 1
+    tnext = time.mktime(t) + 3600
+    tnext = time.localtime(tnext)
+
     return t, tnext
 # except:
     #     return None
@@ -90,20 +87,19 @@ def parse_interval(email, interval):
         maxr = max(r, maxr)
     timestr = email[minl:maxr]
 
-    if timestr.find("and") != -1 or timestr.find("to") != -1:
-        if timestr.find("and") != -1:
-            strarr = timestr.split("and")
+    if timestr.find(" and ") != -1 or timestr.find(" to ") != -1:
+        if timestr.find(" and ") != -1:
+            strarr = timestr.split(" and ")
         else:
-            strarr = timestr.split("to")
+            strarr = timestr.split(" to ")
         intv0 = time_parser.tag_dates(timestr[0]) 
         intv1 = time_parser.tag_dates(timestr[1]) 
         return parse_single_time(timestr[0], intv[0]), parse_single_time(timestr[1], intv[1])
 
     elif timestr.find("-") != -1:
         intv = time_parser.tag_dates(timestr)
-        basetime = parse_single_time(text, intv)
+        basetime = parse_single_time(email, intv)
         intv = filter(lambda x: x[2] == time_parser.TIME_INTERVAL or x == time_parser.DATE_INTERVAL, intv)
-        intv = intv[0]
         timestr = email[intv[0][0] : intv[0][1]]
         tarray = timestr.split("-")
         tintv = time_parser.tag_dates(tarray[1])
@@ -114,7 +110,7 @@ def parse_interval(email, interval):
         tintv = time_parser.tag_dates(tarray[0] + ampm)
         starttime = parse_single_time(tarray[0]+ampm, tintv, basetime)
 
-        return startime, endtime
+        return starttime, endtime
 
 
 
