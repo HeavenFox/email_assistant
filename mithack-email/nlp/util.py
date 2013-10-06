@@ -53,10 +53,10 @@ def parse_single_time(email, interval, basetime = None):
         target += (email[tlst[0][0]:tlst[0][1]] + ", ")
     if time_parser.DATE in types:
         tlst = filter(lambda x: x[2] == time_parser.DATE, interval)
-        target += (email[tlst[0][0]:tlst[0][1]] + ", ")
+        target += (email[tlst[0][0]:tlst[0][1]])
     if time_parser.TIME in types:
         tlst = filter(lambda x: x[2] == time_parser.TIME, interval)
-        target += (email[tlst[0][0]:tlst[0][1]] + ", ")
+        target += (" at " + email[tlst[0][0]:tlst[0][1]])
     result, succ = parser.parse(target.strip(), basetime)
     if succ == 0:
         return None

@@ -30,5 +30,23 @@ s.append("""
         Fraternally,
         Don
         """)
+s.append("""
+        Hey ctas!
+
+        It appears that a number of us are busy with prelims and other obligations so we have decided to cancel the CTAS BBQ/Picnic. 
+
+        Instead, please meet us in RPCC lobby at 11am on Sunday, September 29th for Brunch. We hope to see you there!
+
+        Best,
+
+        Rick Jean
+        Cornell University | Class of 2014
+        B.Sc. Applied Economics and Management
+        Mobile: 646-648-2503
+        Email: rj92@cornell.edu
+        """)
 for string in s:
     print util.parse(string)
+
+# import pdb; pdb.set_trace()
+print util.parse(s[6])
