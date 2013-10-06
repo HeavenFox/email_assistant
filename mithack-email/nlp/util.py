@@ -71,6 +71,8 @@ def parse(text):
     if time_parser.TIME_INTERVAL in types:
         return parse_interval(text, intv)
     t = parse_single_time(text, intv)
+    if t is None:
+        return None, None
     tnext = time.mktime(t) + 3600
     tnext = time.localtime(tnext)
 
