@@ -38,7 +38,7 @@ def combine_intervals(intvs):
     last_s, last_t, last_type = intervals[0]
     for s, t, lt in intervals[1:]:
         if s <= last_t:
-            last_t = t
+            last_t = max(t, last_t)
             last_type = max(lt, last_type)
         else:
             combined_intervals.append((last_s, last_t, last_type))
